@@ -1,0 +1,29 @@
+services:
+  pg:
+    container_name: pg
+    image: postgres:16-alpine
+    ports: [5432]
+    environment:
+      - POSTGRES_PASSWORD=postgres
+  serials:
+    container_name: serials
+    image: folioorg/mod-serials-management:1.0.3
+    depends_on: ["pg"]
+    environment:
+      - DB_HOST=pg
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_DATABASE=postgres
+    ports: [8080]
+  setup:
+    container_name: setup
+    image: curlimages/curl
+    depends_on: ["serials"]
+    restart: "no"
+    entrypoint: [ "/setup.sh" ]
+    volumes:
+      - ./setup.sh:/setup.sh:ro
+networks:
+  default:
+    name: serialsnet
